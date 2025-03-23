@@ -1,6 +1,7 @@
 // fileds needed: username, password, email, projectId, role, refreshTokens[]
-// methods needed: comparePassword, generateAccessToken, generateAndSaveRefreshToken, regenerateRefreshToken, revokeRefreshToken, revokeAllRefreshTokens
+// indexes needed: (username, projectId), (email, projectId)
 // pre-save hook needed: hashPassword
+// methods needed: comparePassword, generateAccessToken, generateAndSaveRefreshToken, regenerateRefreshToken, revokeRefreshToken, revokeAllRefreshTokens
 
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
@@ -33,6 +34,9 @@ const b2cSchema = new mongoose.Schema({
         required: false,
     },
 });
+
+b2cSchema.index({ username: 1, projectId: 1 }, { unique: true });
+b2cSchema.index({ email: 1, projectId: 1 }, { unique: true });
 
 // Pre-save hook to hash password
 b2cSchema.pre("save", async function (next) {
@@ -69,7 +73,7 @@ b2cSchema.methods = {
                 {
                     file: "b2cSchema.js",
                     function: "generateAccessToken",
-                    line: "62",
+                    line: "66",
                 }
             );
         }
@@ -96,7 +100,7 @@ b2cSchema.methods = {
                 {
                     file: "b2cSchema.js",
                     function: "generateAndSaveRefreshToken",
-                    line: "89",
+                    line: "93",
                 }
             );
         }
@@ -131,7 +135,7 @@ b2cSchema.methods = {
             throw new AppError("Invalid refresh token", 401, {
                 file: "b2cSchema.js",
                 function: "regenerateRefreshToken",
-                line: "129",
+                line: "133",
             });
         }
 
@@ -140,7 +144,7 @@ b2cSchema.methods = {
             throw new AppError("Refresh token not found", 404, {
                 file: "b2cSchema.js",
                 function: "regenerateRefreshToken",
-                line: "139",
+                line: "143",
             });
         }
 
@@ -168,7 +172,7 @@ b2cSchema.methods = {
             throw new AppError("Invalid refresh token", 401, {
                 file: "b2cSchema.js",
                 function: "revokeRefreshToken",
-                line: "166",
+                line: "170",
             });
         }
 
@@ -177,7 +181,7 @@ b2cSchema.methods = {
             throw new AppError("Refresh token not found", 404, {
                 file: "b2cSchema.js",
                 function: "revokeRefreshToken",
-                line: "176",
+                line: "180",
             });
         }
 
