@@ -5,7 +5,7 @@
 
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import { AppError } from "../middlewares/errorHandler.middleware";
+import { AppError } from "../middlewares/errorHandler.middleware.js";
 import jwt from "jsonwebtoken";
 
 const b2cSchema = new mongoose.Schema({
