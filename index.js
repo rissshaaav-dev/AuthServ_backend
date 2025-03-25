@@ -7,6 +7,7 @@ import {
     catchAsync,
     AppError,
 } from "./middlewares/errorHandler.middleware.js";
+import b2cRouter from "./routes/b2c.route.js";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -27,6 +28,7 @@ app.get(
         throw new AppError("This is a test error", 400);
     })
 );
+app.use("/api/b2c/", b2cRouter);
 
 app.use(errorHandler);
 
