@@ -1,6 +1,6 @@
 // fields needed: ownerId, projectDetails (name, description, logo), projectCredentials (uid, secret), projectSetings (roles, permissions, authMethods, socialLogins, passwordPolicy, redirectUrl, authUrl), userList[], status, isDeleted
-// indexes needed: (ownerId, projectCredentials.uid)
-// pre-save hook needed: generateProjectCredentials
+// indexes needed: (ownerId, projectCredentials.uid), (ownerId, projectDetails.name)
+// pre-save hook needed: generateProjectCredentials, generateAuthUrl
 // methods needed: authenticateProject, regenerateProjectSecret, revokeProjectCredentials, deleteProject
 
 import mongoose from "mongoose";
@@ -31,11 +31,11 @@ const projectSchema = new mongoose.Schema({
     projectCredentials: {
         uid: {
             type: String,
-            required: true,
+            // required: true,
         },
         secret: {
             type: String,
-            required: true,
+            // required: true,
         },
     },
     projectSettings: {
@@ -102,6 +102,10 @@ projectSchema.index(
     { ownerId: 1, "projectCredentials.uid": 1 },
     { unique: true }
 );
+projectSchema.index(
+    { ownerId: 1, "projectDetails.name": 1 },
+    { unique: true }
+);
 
 projectSchema.pre("save", async function (next) {
     try {
@@ -111,21 +115,24 @@ projectSchema.pre("save", async function (next) {
         }
 
         // Generate a unique project id using nanoid after checking if it's not alreadt present
-        if (!this.projectCredentials.projectId) {
-            this.projectCredentials.projectId = `prj${nanoid(12)}`;
+        if (!this.projectCredentials.uid) {
+            this.projectCredentials.uid = `prj${nanoid(12)}`;
         }
 
         // Generate a unique project secret using crypto and hash it before saving using bcrypt
-        if (!this.projectCredentials.projectSecret) {
+        if (!this.projectCredentials.secret) {
             const uniqueSecret = crypto.randomBytes(16).toString("hex");
 
             // Attach the unhashed secret to the instance to return it to the user but only once
             this._unhashedProjectSecret = uniqueSecret;
-            this.projectCredentials.projectSecret = await bcrypt.hash(
+            this.projectCredentials.secret = await bcrypt.hash(
                 uniqueSecret,
                 10
             );
         }
+
+        // Generate authUrl using the projectCredentials.uid
+        this.projectSettings.authUrl = `http://localhost:3000/auth/${this.projectCredentials.uid}`;
         next();
     } catch (error) {
         next(new AppError("Error generating project credentials", 500));
@@ -176,4 +183,5 @@ projectSchema.methods = {
 };
 
 const Project = mongoose.model("Project", projectSchema);
+Project.createIndexes();
 export default Project;
