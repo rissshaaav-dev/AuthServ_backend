@@ -1,11 +1,16 @@
-import { catchAsync, AppError } from "../../middlewares/errorHandler.middleware.js";
+import {
+    catchAsync,
+    AppError,
+} from "../../middlewares/errorHandler.middleware.js";
 import B2C from "../../models/b2c.model.js";
+import Project from "../../models/project.model.js";
 
 const b2cSignup = catchAsync(async (req, res, next) => {
     // get suer inputs
     // check for existing user (must not be having the same username and email in a project)
     // create a new user
     // save the user
+    // add user to the project and save
     // send 201 response
 
     // get user inputs
@@ -35,7 +40,17 @@ const b2cSignup = catchAsync(async (req, res, next) => {
     });
 
     // save the user
-    await newB2c.save();
+    const savedB2c = await newB2c.save();
+
+    // add user to the project and save
+    const project = await Project.findOne({
+        "projectCredentials.uid": projectId,
+    });
+    if (!project) {
+        return next(new AppError("Project not found.", 404));
+    }
+    project.users.push(savedB2c._id);
+    await project.save();
 
     // send 201 response
     res.status(201).json({
