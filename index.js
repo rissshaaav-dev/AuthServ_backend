@@ -29,7 +29,7 @@ app.get(
         throw new AppError("This is a test error", 400);
     })
 );
-app.use("/api/b2c/", b2cRouter);
+app.use("/api/b2c/:projectId", b2cRouter);
 app.use("/api/b2b/projects", projectRouter);
 
 app.use(errorHandler);
