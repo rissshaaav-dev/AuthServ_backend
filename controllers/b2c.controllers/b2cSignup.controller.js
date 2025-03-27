@@ -7,6 +7,7 @@ import Project from "../../models/project.model.js";
 
 const b2cSignup = catchAsync(async (req, res, next) => {
     // get suer inputs
+    // extract projectId from req.body
     // check for existing user (must not be having the same username and email in a project)
     // create a new user
     // save the user
@@ -14,7 +15,9 @@ const b2cSignup = catchAsync(async (req, res, next) => {
     // send 201 response
 
     // get user inputs
-    const { username, email, password, projectId, role } = req.body;
+    const { username, email, password, role } = req.body;
+
+    const projectId = req.body.projectData.projectId;
 
     // check for existing user (must not be having same username and email waithin a project)
     const existingUserCheck = await B2C.findOne({
